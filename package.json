@@ -17,6 +17,7 @@
     "cross-env": "^7.0.3",
     "mocha": "^10.2.0",
     "prettier": "^2.8.7",
+    "promise-polyfill": "^8.3.0",
     "promises-aplus-tests": "^2.1.2",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
