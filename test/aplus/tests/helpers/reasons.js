@@ -2,7 +2,7 @@
 
 // This module exports some valid rejection reason factories, keyed by human-readable versions of their names.
 
-var adapter = global.adapter
+var adapter = require('../../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
 

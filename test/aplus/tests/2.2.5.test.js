@@ -1,8 +1,8 @@
 /*jshint strict: false */
 
-var assert = require('assert')
+var assert = require('node:assert')
 
-var adapter = global.adapter
+var adapter = require('../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
 

@@ -1,6 +1,6 @@
 'use strict'
 
-var adapter = global.adapter
+var adapter = require('../../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
 var deferred = adapter.deferred

@@ -6,7 +6,7 @@
   "scripts": {
     "build:dev": "cross-env NODE_ENV=development webpack",
     "build:prod": "cross-env NODE_ENV=production webpack",
-    "test": "mocha"
+    "test": "mocha --parallel \".\\test\\**\\*.test.*\""
   },
   "keywords": [
     "promise"
@@ -19,6 +19,7 @@
     "prettier": "^2.8.7",
     "promise-polyfill": "^8.3.0",
     "promises-aplus-tests": "^2.1.2",
+    "sinon": "^15.0.3",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
     "webpack": "^5.80.0",

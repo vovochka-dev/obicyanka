@@ -1,6 +1,6 @@
 'use strict'
 
-var assert = require('assert')
+var assert = require('node:assert')
 var sinon = require('sinon')
 var testFulfilled = require('./helpers/testThreeCases').testFulfilled
 var testRejected = require('./helpers/testThreeCases').testRejected
