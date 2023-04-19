@@ -2,6 +2,18 @@
 
 var assert = require('node:assert')
 var thenables = require('./helpers/thenables')
+
+let thenablesFulfilledHalf1 = {
+    'a synchronously-fulfilled custom thenable': thenables.fulfilled['a synchronously-fulfilled custom thenable'],
+    'an asynchronously-fulfilled custom thenable': thenables.fulfilled['an asynchronously-fulfilled custom thenable'],
+    'a synchronously-fulfilled one-time thenable': thenables.fulfilled['a synchronously-fulfilled one-time thenable'],
+    'a thenable that tries to fulfill twice': thenables.fulfilled['a thenable that tries to fulfill twice'],
+}
+let thenablesFulfilledHalf2 = {
+    'a thenable that fulfills but then throws': thenables.fulfilled['a thenable that fulfills but then throws'],
+    'an already-fulfilled promise': thenables.fulfilled['an already-fulfilled promise'],
+    'an eventually-fulfilled promise': thenables.fulfilled['an eventually-fulfilled promise'],
+}
 var reasons = require('./helpers/reasons')
 
 var adapter = require('../../adapter')
@@ -62,49 +74,10 @@ function testCallingResolvePromise(yFactory, stringRepresentation, test) {
     })
 }
 
-function testCallingRejectPromise(r, stringRepresentation, test) {
-    describe('`r` is ' + stringRepresentation, function () {
-        describe('`then` calls `rejectPromise` synchronously', function () {
-            function xFactory() {
-                return {
-                    then: function (resolvePromise, rejectPromise) {
-                        rejectPromise(r)
-                    },
-                }
-            }
-
-            testPromiseResolution(xFactory, test)
-        })
-
-        describe('`then` calls `rejectPromise` asynchronously', function () {
-            function xFactory() {
-                return {
-                    then: function (resolvePromise, rejectPromise) {
-                        setTimeout(function () {
-                            rejectPromise(r)
-                        }, 0)
-                    },
-                }
-            }
-
-            testPromiseResolution(xFactory, test)
-        })
-    })
-}
-
 function testCallingResolvePromiseFulfillsWith(yFactory, stringRepresentation, fulfillmentValue) {
     testCallingResolvePromise(yFactory, stringRepresentation, function (promise, done) {
         promise.then(function onPromiseFulfilled(value) {
             assert.strictEqual(value, fulfillmentValue)
-            done()
-        })
-    })
-}
-
-function testCallingResolvePromiseRejectsWith(yFactory, stringRepresentation, rejectionReason) {
-    testCallingResolvePromise(yFactory, stringRepresentation, function (promise, done) {
-        promise.then(null, function onPromiseRejected(reason) {
-            assert.strictEqual(reason, rejectionReason)
             done()
         })
     })
@@ -119,8 +92,8 @@ describe(
                 Object.keys(thenables.fulfilled).forEach(function (outerStringRepresentation) {
                     var outerThenableFactory = thenables.fulfilled[outerStringRepresentation]
 
-                    Object.keys(thenables.rejected).forEach(function (innerStringRepresentation) {
-                        var innerThenableFactory = thenables.rejected[innerStringRepresentation]
+                    Object.keys(thenablesFulfilledHalf1).forEach(function (innerStringRepresentation) {
+                        var innerThenableFactory = thenables.fulfilled[innerStringRepresentation]
 
                         var stringRepresentation = outerStringRepresentation + ' for ' + innerStringRepresentation
 
@@ -128,7 +101,7 @@ describe(
                             return outerThenableFactory(innerThenableFactory(sentinel))
                         }
 
-                        testCallingResolvePromiseRejectsWith(yFactory, stringRepresentation, sentinel)
+                        testCallingResolvePromiseFulfillsWith(yFactory, stringRepresentation, sentinel)
                     })
                 })
             })
