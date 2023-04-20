@@ -44,14 +44,21 @@ module.exports = class Promise<T> {
     }
 
     _runSubscriber(subscriber: Promise<any>): void {
-        const cb = this._state === State.fulfilled ? subscriber.onFulfillment : subscriber.onRejection
-        let value
-        if (cb === null) {
-        } // resolve then(null, null)
-        else {
-            value = cb(this._value)
-        }
-        // call subscriber
+        const self = this
+        setImmediate(function () {
+            let cb = self._state === State.fulfilled ? subscriber.onFulfillment : subscriber.onRejection
+            let value
+            if (cb === null) {
+                if (self._state === State.fulfilled) {
+                    subscriber._resolveHandler.bind(subscriber)(self._value)
+                } else {
+                    subscriber._rejectHandler.bind(subscriber)(self._value)
+                }
+                return
+            } else {
+                value = cb(self._value)
+            }
+        })
     }
 
     _runSubscribers(): void {
