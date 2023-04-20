@@ -6,7 +6,7 @@
   "scripts": {
     "build:dev": "cross-env NODE_ENV=development tsc",
     "build:prod": "cross-env NODE_ENV=production tsc",
-    "test": "npm run build:dev && mocha --parallel \".\\test\\**\\*.test.*\""
+    "test": "npm run build:dev && mocha --parallel"
   },
   "keywords": [
     "promise"
