@@ -10,11 +10,12 @@ describe('executor', function () {
         assert.strictEqual(called, true)
     })
 
-    it('should pass value to onFullfillment', function () {
+    it('should pass value to onFullfillment', function (done) {
         new adapter.Promise((resolve) => {
             resolve('value')
         }).then((value) => {
             assert.strictEqual(value, 'value')
+            done()
         })
     })
 })
