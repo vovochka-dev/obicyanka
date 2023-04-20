@@ -22,13 +22,22 @@ module.exports = class Promise<T> {
     }
 
     _resolveHandler(value: [Promise<any> | Thenable | any]) {
+        if (!this._executorCbCalled) return
+        else {
+            this._executorCbCalled = true
+        }
         this._value = value
         this._handled = true
         this._state = State.fulfilled
         this._runSubscribers()
     }
 
-    _rejectHandler(reason: any) {}
+    _rejectHandler(reason: any) {
+        if (!this._executorCbCalled) return
+        else {
+            this._executorCbCalled = true
+        }
+    }
 
     _runSubscriber(subscriber: Promise<any>): void {
         const cb = this._state === State.fulfilled ? subscriber.onFulfillment : subscriber.onRejection
@@ -59,7 +68,6 @@ module.exports = class Promise<T> {
         if (this._handled) {
             this._runSubscriber(subscriber)
         } else {
-            console.log('subscribe')
             // subscribe
             this._subscribers.push(subscriber)
         }
