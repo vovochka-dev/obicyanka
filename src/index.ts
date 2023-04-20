@@ -22,7 +22,7 @@ module.exports = class Promise<T> {
     }
 
     _resolveHandler(value: [Promise<any> | Thenable | any]) {
-        if (!this._executorCbCalled) return
+        if (this._executorCbCalled) return
         else {
             this._executorCbCalled = true
         }
@@ -33,7 +33,7 @@ module.exports = class Promise<T> {
     }
 
     _rejectHandler(reason: any) {
-        if (!this._executorCbCalled) return
+        if (this._executorCbCalled) return
         else {
             this._executorCbCalled = true
         }
