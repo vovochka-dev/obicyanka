@@ -37,6 +37,10 @@ module.exports = class Promise<T> {
         else {
             this._executorCbCalled = true
         }
+        this._value = reason
+        this._handled = true
+        this._state = State.rejected
+        this._runSubscribers()
     }
 
     _runSubscriber(subscriber: Promise<any>): void {
