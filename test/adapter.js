@@ -1,5 +1,5 @@
-//var Promise = require('../dist/bundle.js')
-let Promise = require('promise-polyfill')
+var Promise = require('../src/index.js')
+//let Promise = require('promise-polyfill')
 
 let deferred = function () {
     let resolve
@@ -31,4 +31,5 @@ module.exports = {
     deferred,
     resolved,
     rejected,
+    Promise,
 }

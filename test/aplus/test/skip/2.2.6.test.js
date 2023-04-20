@@ -2,8 +2,8 @@
 
 var assert = require('node:assert')
 var sinon = require('sinon')
-var testFulfilled = require('./helpers/testThreeCases').testFulfilled
-var testRejected = require('./helpers/testThreeCases').testRejected
+var testFulfilled = require('../helpers/testThreeCases').testFulfilled
+var testRejected = require('../helpers/testThreeCases').testRejected
 
 var dummy = { dummy: 'dummy' } // we fulfill or reject with this when we don't intend to test against it
 var other = { other: 'other' } // a value we don't want to be strict equal to
