@@ -31,4 +31,5 @@ module.exports = {
     deferred,
     resolved,
     rejected,
+    Promise,
 }
