@@ -63,8 +63,9 @@ module.exports = class Promise<T> {
 
     then(onFulfillment: () => void, onRejection: () => void) {
         let subscriber = new Promise(() => {})
-        subscriber.onFulfillment = onFulfillment
-        subscriber.onRejection = onRejection
+        subscriber.onFulfillment = typeof onFulfillment === 'function' ? onFulfillment : null
+        subscriber.onRejection = typeof onRejection === 'function' ? onRejection : null
+        typeof onRejection === 'function' ? onRejection : null
         if (this._handled) {
             this._runSubscriber(subscriber)
         } else {
