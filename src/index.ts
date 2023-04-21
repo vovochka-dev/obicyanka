@@ -33,23 +33,26 @@ module.exports = class Promise<T> {
                 typeof element.then === 'function'
             )
         }
-
-        if (value instanceof Promise) {
+        try {
+            if (value instanceof Promise) {
+                this._value = value
+                this._state = State.fulfilled
+                this._handled = false
+                return
+            } else if (isThenable(value)) {
+                this._handled = true
+                this._value = new Promise(value.then.bind(value))
+                this._state = State.fulfilled
+                this._handled = false
+                return
+            }
             this._value = value
-            this._state = State.fulfilled
-            this._handled = false
-            return
-        } else if (isThenable(value)) {
             this._handled = true
-            this._value = new Promise(value.then.bind(value))
             this._state = State.fulfilled
-            this._handled = false
-            return
+            this._runSubscribers()
+        } catch (e) {
+            this._rejectHandler(e)
         }
-        this._value = value
-        this._handled = true
-        this._state = State.fulfilled
-        this._runSubscribers()
     }
 
     _rejectHandler(reason: any) {
