@@ -2,7 +2,7 @@
 
 var assert = require('node:assert')
 
-var adapter = require('../../../adapter')
+var adapter = require('../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
 
