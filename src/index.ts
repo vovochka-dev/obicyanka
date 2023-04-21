@@ -23,8 +23,12 @@ module.exports = class Promise<T> {
 
     _resolveHandler(value: [Promise<any> | Thenable | any]) {
         if (this._executorCbCalled) return
-        else {
-            this._executorCbCalled = true
+        else this._executorCbCalled = true
+        if (value instanceof Promise) {
+            this._value = value
+            this._state = State.fulfilled
+            this._handled = false
+            return
         }
         this._value = value
         this._handled = true
@@ -62,8 +66,15 @@ module.exports = class Promise<T> {
     }
 
     _runSubscribers(): void {
+        function getDeepestPromise(promise: Promise<any>) {
+            while (promise._state === State.pending && promise._handled) {
+                promise = promise._value
+            }
+            return promise
+        }
+        const deepestPromise = getDeepestPromise(this)
         if (this._handled) {
-            if (this._subscribers.length > 0) {
+            if (deepestPromise._subscribers.length > 0) {
                 for (let subscriber of this._subscribers) {
                     this._runSubscriber(subscriber)
                 }
