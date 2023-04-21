@@ -59,14 +59,12 @@ module.exports = class Promise<T> {
 
             if (value instanceof Promise) {
                 this._value = value
-                this._state = State.fulfilled
                 this._handled = true
                 this._handleSubscribers()
                 return
             } else if (isThenable(value)) {
                 this._handled = true
                 this._value = new Promise(value.then.bind(value))
-                this._state = State.fulfilled
                 this._handleSubscribers()
                 return
             }
