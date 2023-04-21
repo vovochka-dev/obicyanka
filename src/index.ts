@@ -124,7 +124,19 @@ module.exports = class Promise<T> {
         return subscriber
     }
 
-    static resolve() {}
+    resolve(value: any) {
+        if (value && typeof value === 'object' && value.constructor === Promise) {
+            return value
+        }
 
-    static reject() {}
+        return new Promise(function (resolve) {
+            resolve(value)
+        })
+    }
+
+    reject(value: any) {
+        return new Promise(function (resolve, reject) {
+            reject(value)
+        })
+    }
 }
