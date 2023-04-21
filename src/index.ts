@@ -89,21 +89,26 @@ module.exports = class Promise<T> {
         this._runSubscribers()
     }
 
-    _runSubscriber(subscriber: Promise<any>): void {
+    _runSubscriber(subscriber: Promise<any>) {
         const self = this
+        self._handled = true
         setImmediate(function () {
             let cb = self._state === State.fulfilled ? subscriber.onFulfillment : subscriber.onRejection
-            let value
+
             if (cb === null) {
-                if (self._state === State.fulfilled) {
-                    subscriber._resolveHandler.bind(subscriber)(self._value)
-                } else {
-                    subscriber._rejectHandler.bind(subscriber)(self._value)
-                }
+                if (self._state === State.fulfilled) cb = subscriber._resolveHandler
+                else cb = subscriber._rejectHandler
+                cb.bind(subscriber)(self._value)
                 return
-            } else {
-                value = cb(self._value)
             }
+            let value
+            try {
+                value = cb(self._value)
+            } catch (e) {
+                subscriber._rejectHandler(e)
+                return
+            }
+            subscriber._resolveHandler(value)
         })
     }
 
