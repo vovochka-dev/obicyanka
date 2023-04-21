@@ -4,7 +4,7 @@ enum State {
     'rejected',
 }
 interface Thenable {
-    then: (onFulfillment?: () => Promise<any>, onRejection?: () => Promise<any>) => {}
+    then: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => {}
 }
 
 module.exports = class Promise<T> {
@@ -16,16 +16,32 @@ module.exports = class Promise<T> {
     onFulfillment: null | ((value: any) => any) = null
     onRejection: null | ((error: any) => any) = null
     constructor(
-        executor: (resolve: (value: [Promise<any> | Thenable | any]) => void, reject: (reason: any) => void) => void
+        executor: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => void
     ) {
         executor(this._resolveHandler.bind(this), this._rejectHandler.bind(this))
     }
 
-    _resolveHandler(value: [Promise<any> | Thenable | any]) {
+    _resolveHandler(value: Promise<any> | Thenable | any) {
         if (this._executorCbCalled) return
         else this._executorCbCalled = true
+
+        const isThenable = (element: unknown): element is Thenable => {
+            return (
+                typeof element === 'object' &&
+                element !== null &&
+                'then' in element &&
+                typeof element.then === 'function'
+            )
+        }
+
         if (value instanceof Promise) {
             this._value = value
+            this._state = State.fulfilled
+            this._handled = false
+            return
+        } else if (isThenable(value)) {
+            this._handled = true
+            this._value = new Promise(value.then.bind(value))
             this._state = State.fulfilled
             this._handled = false
             return
