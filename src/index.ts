@@ -56,19 +56,20 @@ module.exports = class Promise<T> {
             if (value instanceof Promise) {
                 this._value = value
                 this._state = State.fulfilled
-                this._handled = false
+                this._handled = true
+                this._handleSubscribers()
                 return
             } else if (isThenable(value)) {
                 this._handled = true
                 this._value = new Promise(value.then.bind(value))
                 this._state = State.fulfilled
-                this._handled = false
+                this._handleSubscribers()
                 return
             }
             this._value = value
             this._handled = true
             this._state = State.fulfilled
-            this._runSubscribers()
+            this._handleSubscribers()
         } catch (e) {
             this._rejectHandler(e)
         }
@@ -86,7 +87,7 @@ module.exports = class Promise<T> {
                 }
             })
         }
-        this._runSubscribers()
+        this._handleSubscribers()
     }
 
     _runSubscriber(subscriber: Promise<any>) {
@@ -112,22 +113,11 @@ module.exports = class Promise<T> {
         })
     }
 
-    _runSubscribers(): void {
-        function getDeepestPromise(promise: Promise<any>) {
-            while (promise._state === State.pending && promise._handled) {
-                promise = promise._value
-            }
-            return promise
+    _handleSubscribers() {
+        for (let subscriber of this._subscribers) {
+            this.handle(subscriber)
         }
-        const deepestPromise = getDeepestPromise(this)
-        if (this._handled) {
-            if (deepestPromise._subscribers.length > 0) {
-                for (let subscriber of this._subscribers) {
-                    this._runSubscriber(subscriber)
-                }
-            }
-            this._subscribers = []
-        }
+        this._subscribers = []
     }
 
     _getDeepestPromise() {
