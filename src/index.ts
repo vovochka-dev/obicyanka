@@ -141,7 +141,7 @@ module.exports = class Promise<T> {
         }
     }
 
-    then(onFulfillment: () => void, onRejection: () => void) {
+    then(onFulfillment: null | (() => void), onRejection: () => void) {
         let subscriber = new Promise(() => {})
         subscriber.onFulfillment = typeof onFulfillment === 'function' ? onFulfillment : null
         subscriber.onRejection = typeof onRejection === 'function' ? onRejection : null
@@ -164,5 +164,9 @@ module.exports = class Promise<T> {
         return new Promise(function (resolve, reject) {
             reject(value)
         })
+    }
+
+    catch(onRejected: any) {
+        return this.then(null, onRejected)
     }
 }
