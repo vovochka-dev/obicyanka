@@ -130,17 +130,31 @@ module.exports = class Promise<T> {
         }
     }
 
+    _getDeepestPromise() {
+        let promise = this
+        while (promise._state === State.pending && promise._handled) {
+            // @ts-ignore: Unreachable code error
+            promise = promise._value // as this
+        }
+        return promise
+    }
+
+    handle(subscriber: Promise<any>) {
+        let promise = this._getDeepestPromise()
+        if (promise._state === State.pending) {
+            // promise not resolved, so subscribe subscriber to the deepest promise
+            promise._subscribers.push(subscriber)
+        } else {
+            promise._runSubscriber(subscriber) // promise already resolved.
+        }
+    }
+
     then(onFulfillment: () => void, onRejection: () => void) {
         let subscriber = new Promise(() => {})
         subscriber.onFulfillment = typeof onFulfillment === 'function' ? onFulfillment : null
         subscriber.onRejection = typeof onRejection === 'function' ? onRejection : null
         typeof onRejection === 'function' ? onRejection : null
-        if (this._handled) {
-            this._runSubscriber(subscriber)
-        } else {
-            // subscribe
-            this._subscribers.push(subscriber)
-        }
+        this.handle(subscriber)
         return subscriber
     }
 
