@@ -17,6 +17,8 @@ module.exports = class Promise<T> {
     constructor(
         executor: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => void
     ) {
+        if (!(this instanceof Promise)) throw new TypeError('Promises must be constructed via new')
+        if (typeof executor !== 'function') throw new TypeError('not a function')
         this.runExecutor(executor)
     }
 
@@ -37,10 +39,10 @@ module.exports = class Promise<T> {
                     this._rejectHandler(reason)
                 }
             )
-        } catch (ex) {
+        } catch (e) {
             if (done) return
             done = true
-            this._rejectHandler(ex)
+            this._rejectHandler(e)
         }
     }
     _resolveHandler(value: Promise<any> | Thenable | any) {
@@ -53,6 +55,8 @@ module.exports = class Promise<T> {
             )
         }
         try {
+            if (value === this) throw new TypeError('A promise cannot be resolved with itself.')
+
             if (value instanceof Promise) {
                 this._value = value
                 this._state = State.fulfilled
