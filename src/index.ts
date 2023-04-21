@@ -60,9 +60,17 @@ module.exports = class Promise<T> {
         else {
             this._executorCbCalled = true
         }
+        let self = this
         this._value = reason
         this._handled = true
         this._state = State.rejected
+        if (this._state === State.rejected && this._subscribers.length === 0) {
+            setImmediate(function () {
+                if (!self._handled) {
+                    console.warn('Possible Unhandled Promise Rejection:', self._value)
+                }
+            })
+        }
         this._runSubscribers()
     }
 
