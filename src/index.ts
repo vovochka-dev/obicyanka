@@ -10,7 +10,6 @@ interface Thenable {
 module.exports = class Promise<T> {
     _state: State = State.pending
     _handled: boolean = false
-    _executorCbCalled: boolean = false
     _subscribers: Promise<any>[] = []
     _value: any
     onFulfillment: null | ((value: any) => any) = null
@@ -18,13 +17,33 @@ module.exports = class Promise<T> {
     constructor(
         executor: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => void
     ) {
-        executor(this._resolveHandler.bind(this), this._rejectHandler.bind(this))
+        this.runExecutor(executor)
     }
 
+    runExecutor(
+        executor: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => void
+    ) {
+        let done = false
+        try {
+            executor(
+                (value) => {
+                    if (done) return
+                    done = true
+                    this._resolveHandler(value)
+                },
+                (reason) => {
+                    if (done) return
+                    done = true
+                    this._rejectHandler(reason)
+                }
+            )
+        } catch (ex) {
+            if (done) return
+            done = true
+            this._rejectHandler(ex)
+        }
+    }
     _resolveHandler(value: Promise<any> | Thenable | any) {
-        if (this._executorCbCalled) return
-        else this._executorCbCalled = true
-
         const isThenable = (element: unknown): element is Thenable => {
             return (
                 typeof element === 'object' &&
@@ -56,10 +75,6 @@ module.exports = class Promise<T> {
     }
 
     _rejectHandler(reason: any) {
-        if (this._executorCbCalled) return
-        else {
-            this._executorCbCalled = true
-        }
         let self = this
         this._value = reason
         this._handled = true
