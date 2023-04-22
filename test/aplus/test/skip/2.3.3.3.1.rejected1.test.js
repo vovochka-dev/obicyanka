@@ -10,23 +10,12 @@ let thenablesRejectedHalf1 = {
     'a thenable that immediately throws in `then`': thenables.rejected['a thenable that immediately throws in `then`'],
 }
 
-let thenablesRejectedHalf2 = {
-    'an object with a throwing `then` accessor': thenables.rejected['an object with a throwing `then` accessor'],
-    'an already-rejected promise': thenables.rejected['an already-rejected promise'],
-    'an eventually-rejected promise': thenables.rejected['an eventually-rejected promise'],
-}
-
-var reasons = require('../helpers/reasons')
-
 var adapter = require('../../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
-var deferred = adapter.deferred
 
 var dummy = { dummy: 'dummy' } // we fulfill or reject with this when we don't intend to test against it
 var sentinel = { sentinel: 'sentinel' } // a sentinel fulfillment value to test for with strict equality
-var other = { other: 'other' } // a value we don't want to be strict equal to
-var sentinelArray = [sentinel] // a sentinel fulfillment value to test when we need an array
 
 function testPromiseResolution(xFactory, test) {
     specify('via return from a fulfilled promise', function (done) {

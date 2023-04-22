@@ -3,28 +3,18 @@
 var assert = require('node:assert')
 var thenables = require('../helpers/thenables')
 
-let thenablesFulfilledHalf1 = {
-    'a synchronously-fulfilled custom thenable': thenables.fulfilled['a synchronously-fulfilled custom thenable'],
-    'an asynchronously-fulfilled custom thenable': thenables.fulfilled['an asynchronously-fulfilled custom thenable'],
-    'a synchronously-fulfilled one-time thenable': thenables.fulfilled['a synchronously-fulfilled one-time thenable'],
-    'a thenable that tries to fulfill twice': thenables.fulfilled['a thenable that tries to fulfill twice'],
-}
 let thenablesFulfilledHalf2 = {
     'a thenable that fulfills but then throws': thenables.fulfilled['a thenable that fulfills but then throws'],
     'an already-fulfilled promise': thenables.fulfilled['an already-fulfilled promise'],
     'an eventually-fulfilled promise': thenables.fulfilled['an eventually-fulfilled promise'],
 }
-var reasons = require('../helpers/reasons')
 
 var adapter = require('../../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
-var deferred = adapter.deferred
 
 var dummy = { dummy: 'dummy' } // we fulfill or reject with this when we don't intend to test against it
 var sentinel = { sentinel: 'sentinel' } // a sentinel fulfillment value to test for with strict equality
-var other = { other: 'other' } // a value we don't want to be strict equal to
-var sentinelArray = [sentinel] // a sentinel fulfillment value to test when we need an array
 
 function testPromiseResolution(xFactory, test) {
     specify('via return from a fulfilled promise', function (done) {
