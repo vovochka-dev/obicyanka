@@ -1,3 +1,7 @@
+const promiseFinally = require('./finally')
+const allSettled = require('./allSettled')
+const any = require('./any')
+
 enum State {
     'pending',
     'fulfilled',
@@ -45,6 +49,7 @@ module.exports = class Promise<T> {
             this._rejectHandler(e)
         }
     }
+
     _resolveHandler(value: Promise<any> | Thenable | any) {
         const isThenable = (element: unknown): element is Thenable => {
             return (
@@ -169,4 +174,63 @@ module.exports = class Promise<T> {
     catch(onRejected: any) {
         return this.then(null, onRejected)
     }
+    all(arr: Array<any>) {
+        return new Promise(function (resolve, reject) {
+            if (!Array.isArray(arr)) {
+                return reject(new TypeError('Promise.all accepts an array'))
+            }
+
+            let args = Array.prototype.slice.call(arr)
+            if (args.length === 0) return resolve([])
+            let remaining = args.length
+
+            function res(i: number, val: any) {
+                try {
+                    if (val && (typeof val === 'object' || typeof val === 'function')) {
+                        let then = val.then
+                        if (typeof then === 'function') {
+                            then.call(
+                                val,
+                                function (val: any) {
+                                    res(i, val)
+                                },
+                                reject
+                            )
+                            return
+                        }
+                    }
+                    args[i] = val
+                    if (--remaining === 0) {
+                        resolve(args)
+                    }
+                } catch (ex) {
+                    reject(ex)
+                }
+            }
+
+            for (let i = 0; i < args.length; i++) {
+                res(i, args[i])
+            }
+        })
+    }
+
+    any(arr: Promise<any>[]) {
+        return any(arr)
+    }
+}
+
+Promise.prototype['finally'] = promiseFinally
+
+Promise.allSettled = allSettled
+
+Promise.race = function (arr: Promise<any>[]) {
+    return new Promise(function (resolve, reject) {
+        if (!Array.isArray(arr)) {
+            return reject(new TypeError('Promise.race accepts an array'))
+        }
+
+        for (let i = 0, len = arr.length; i < len; i++) {
+            Promise.resolve(arr[i]).then(resolve, reject)
+        }
+    })
 }
