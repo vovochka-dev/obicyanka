@@ -53,21 +53,24 @@ module.exports = class Promise<T> {
     _resolveHandler(value: Promise<any> | Thenable | any) {
         try {
             if (value === this) throw new TypeError('A promise cannot be resolved with itself.')
-            const then = value.then
             if (value instanceof Promise) {
+                this._handled = true
                 this._value = value
-                this._handled = true
-                this._handleSubscribers()
-                return
-            } else if (typeof then === 'function') {
-                this._handled = true
-                this._value = new Promise(then.bind(value))
                 this._handleSubscribers()
                 return
             }
-            this._value = value
-            this._handled = true
+            if (value && (typeof value === 'object' || typeof value === 'function')) {
+                const then = value.then
+                if (typeof then === 'function') {
+                    this._handled = true
+                    this._value = new Promise(then.bind(value))
+                    this._handleSubscribers()
+                    return
+                }
+            }
             this._state = State.fulfilled
+            this._handled = true
+            this._value = value
             this._handleSubscribers()
         } catch (e) {
             this._rejectHandler(e)
