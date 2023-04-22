@@ -1,9 +1,9 @@
 'use strict'
 
 var assert = require('node:assert')
-var testRejected = require('./helpers/testThreeCases').testRejected
+var testRejected = require('../helpers/testThreeCases').testRejected
 
-var adapter = require('../../adapter')
+var adapter = require('../../../adapter')
 var rejected = adapter.rejected
 var deferred = adapter.deferred
 

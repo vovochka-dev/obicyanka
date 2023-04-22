@@ -1,9 +1,9 @@
 'use strict'
 
 var assert = require('node:assert')
-var testRejected = require('./helpers/testThreeCases').testRejected
+var testRejected = require('../helpers/testThreeCases').testRejected
 
-var adapter = require('../../adapter')
+var adapter = require('../../../adapter')
 var deferred = adapter.deferred
 
 var dummy = { dummy: 'dummy' } // we fulfill or reject with this when we don't intend to test against it
