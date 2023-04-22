@@ -1,24 +1,22 @@
 'use strict'
 
 var assert = require('node:assert')
-var thenables = require('../helpers/thenables')
+var thenables = require('./helpers/thenables')
 
-let thenablesRejectedHalf1 = {
-    'a synchronously-rejected custom thenable': thenables.rejected['a synchronously-rejected custom thenable'],
-    'an asynchronously-rejected custom thenable': thenables.rejected['an asynchronously-rejected custom thenable'],
-    'a synchronously-rejected one-time thenable': thenables.rejected['a synchronously-rejected one-time thenable'],
-    'a thenable that immediately throws in `then`': thenables.rejected['a thenable that immediately throws in `then`'],
+let thenablesFulfilledHalf1 = {
+    'a synchronously-fulfilled custom thenable': thenables.fulfilled['a synchronously-fulfilled custom thenable'],
+    'an asynchronously-fulfilled custom thenable': thenables.fulfilled['an asynchronously-fulfilled custom thenable'],
+    'a synchronously-fulfilled one-time thenable': thenables.fulfilled['a synchronously-fulfilled one-time thenable'],
+    'a thenable that tries to fulfill twice': thenables.fulfilled['a thenable that tries to fulfill twice'],
 }
-
-let thenablesRejectedHalf2 = {
-    'an object with a throwing `then` accessor': thenables.rejected['an object with a throwing `then` accessor'],
-    'an already-rejected promise': thenables.rejected['an already-rejected promise'],
-    'an eventually-rejected promise': thenables.rejected['an eventually-rejected promise'],
+let thenablesFulfilledHalf2 = {
+    'a thenable that fulfills but then throws': thenables.fulfilled['a thenable that fulfills but then throws'],
+    'an already-fulfilled promise': thenables.fulfilled['an already-fulfilled promise'],
+    'an eventually-fulfilled promise': thenables.fulfilled['an eventually-fulfilled promise'],
 }
+var reasons = require('./helpers/reasons')
 
-var reasons = require('../helpers/reasons')
-
-var adapter = require('../../../adapter')
+var adapter = require('../../adapter')
 var resolved = adapter.resolved
 var rejected = adapter.rejected
 var deferred = adapter.deferred
@@ -76,10 +74,10 @@ function testCallingResolvePromise(yFactory, stringRepresentation, test) {
     })
 }
 
-function testCallingResolvePromiseRejectsWith(yFactory, stringRepresentation, rejectionReason) {
+function testCallingResolvePromiseFulfillsWith(yFactory, stringRepresentation, fulfillmentValue) {
     testCallingResolvePromise(yFactory, stringRepresentation, function (promise, done) {
-        promise.then(null, function onPromiseRejected(reason) {
-            assert.strictEqual(reason, rejectionReason)
+        promise.then(function onPromiseFulfilled(value) {
+            assert.strictEqual(value, fulfillmentValue)
             done()
         })
     })
@@ -94,8 +92,8 @@ describe(
                 Object.keys(thenables.fulfilled).forEach(function (outerStringRepresentation) {
                     var outerThenableFactory = thenables.fulfilled[outerStringRepresentation]
 
-                    Object.keys(thenablesRejectedHalf1).forEach(function (innerStringRepresentation) {
-                        var innerThenableFactory = thenables.rejected[innerStringRepresentation]
+                    Object.keys(thenablesFulfilledHalf1).forEach(function (innerStringRepresentation) {
+                        var innerThenableFactory = thenables.fulfilled[innerStringRepresentation]
 
                         var stringRepresentation = outerStringRepresentation + ' for ' + innerStringRepresentation
 
@@ -103,7 +101,7 @@ describe(
                             return outerThenableFactory(innerThenableFactory(sentinel))
                         }
 
-                        testCallingResolvePromiseRejectsWith(yFactory, stringRepresentation, sentinel)
+                        testCallingResolvePromiseFulfillsWith(yFactory, stringRepresentation, sentinel)
                     })
                 })
             })
