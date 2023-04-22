@@ -155,7 +155,7 @@ module.exports = class Promise<T> {
         }
     }
 
-    then(onFulfillment: null | (() => void), onRejection: () => void) {
+    then(onFulfillment: null | ((value: any) => void), onRejection: (value: any) => void) {
         let subscriber = new Promise(() => {})
         subscriber.onFulfillment = typeof onFulfillment === 'function' ? onFulfillment : null
         subscriber.onRejection = typeof onRejection === 'function' ? onRejection : null
@@ -236,16 +236,16 @@ module.exports = class Promise<T> {
     ): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }> {
         return allSettled(values)
     }
-}
 
-Promise.race = function (arr: Promise<any>[]) {
-    return new Promise(function (resolve, reject) {
-        if (!Array.isArray(arr)) {
-            return reject(new TypeError('Promise.race accepts an array'))
-        }
+    static race(arr: Promise<any>[]) {
+        return new Promise(function (resolve, reject) {
+            if (!Array.isArray(arr)) {
+                return reject(new TypeError('Promise.race accepts an array'))
+            }
 
-        for (let i = 0, len = arr.length; i < len; i++) {
-            Promise.resolve(arr[i]).then(resolve, reject)
-        }
-    })
+            for (let i = 0, len = arr.length; i < len; i++) {
+                Promise.resolve(arr[i]).then(resolve, reject)
+            }
+        })
+    }
 }
