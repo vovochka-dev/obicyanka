@@ -7,6 +7,7 @@ enum State {
     'fulfilled',
     'rejected',
 }
+
 interface Thenable {
     then: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => {}
 }
@@ -212,9 +213,11 @@ module.exports = class Promise<T> {
     any(arr: Promise<any>[]) {
         return any(arr)
     }
-}
 
-Promise.prototype['finally'] = promiseFinally
+    finally(onFinally?: (() => void) | undefined | null) {
+        return promiseFinally(onFinally)
+    }
+}
 
 Promise.allSettled = allSettled
 
