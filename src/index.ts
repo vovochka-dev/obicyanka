@@ -12,6 +12,19 @@ interface Thenable {
     then: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => {}
 }
 
+interface PromiseFulfilledResult<T> {
+    status: 'fulfilled'
+    value: T
+}
+
+interface PromiseRejectedResult {
+    status: 'rejected'
+    reason: any
+}
+
+// @ts-ignore
+type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult
+
 module.exports = class Promise<T> {
     _state: State = State.pending
     _handled: boolean = false
@@ -20,7 +33,7 @@ module.exports = class Promise<T> {
     onFulfillment: null | ((value: any) => any) = null
     onRejection: null | ((error: any) => any) = null
     constructor(
-        executor: (resolve: (value: Promise<any> | Thenable | any) => void, reject: (reason: any) => void) => void
+        executor: (resolve: (value: Promise<T> | Thenable | any) => void, reject: (reason: any) => void) => void
     ) {
         if (!(this instanceof Promise)) throw new TypeError('Promises must be constructed via new')
         if (typeof executor !== 'function') throw new TypeError('not a function')
@@ -151,7 +164,7 @@ module.exports = class Promise<T> {
         return subscriber
     }
 
-    resolve(value: any) {
+    static resolve(value: any) {
         if (value && typeof value === 'object' && value.constructor === Promise) {
             return value
         }
@@ -161,7 +174,7 @@ module.exports = class Promise<T> {
         })
     }
 
-    reject(value: any) {
+    static reject(value: any) {
         return new Promise(function (resolve, reject) {
             reject(value)
         })
@@ -217,9 +230,13 @@ module.exports = class Promise<T> {
     finally(onFinally?: (() => void) | undefined | null) {
         return promiseFinally(onFinally)
     }
-}
 
-Promise.allSettled = allSettled
+    allSettled<T extends readonly unknown[] | []>(
+        values: T
+    ): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }> {
+        return allSettled(values)
+    }
+}
 
 Promise.race = function (arr: Promise<any>[]) {
     return new Promise(function (resolve, reject) {
